@@ -5,6 +5,7 @@ import { Song } from './song.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { Rating } from '../rating/rating.model';
 import { Favorite } from '../favorite/favorite.model';
+import { FAVORITE_TARGET } from '../favorite/favorite.constant';
 
 const getAllSongsFromDB = async (query: Record<string, any>) => {
   const songQuery = new QueryBuilder(Song.find(), query)
@@ -26,7 +27,7 @@ const getAllSongsFromDB = async (query: Record<string, any>) => {
   // Run both queries at the same time
   const [ratingsQuery, favoritesQuery] = await Promise.all([
     Rating.find({ targetId: { $in: songIds } }).lean(),
-    Favorite.find({ targetId: { $in: songIds } }).lean(),
+    Favorite.find({ targetId: { $in: songIds }, targetType: FAVORITE_TARGET.SONG }).lean(),
   ]);
 
   // Rating Map
@@ -81,12 +82,33 @@ const getSongByIdFromDB = async (id: string): Promise<ISong> => {
   return song;
 };
 
-const toggleFavoriteInDB = async (id: string): Promise<ISong> => {
+const toggleFavoriteInDB = async (id: string, userId?: string): Promise<ISong> => {
   const song = await Song.findById(id);
   if (!song) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Song not found');
   }
-  song.isFavorite = !song.isFavorite;
+
+  if (userId) {
+    const existing = await Favorite.findOne({
+      userId,
+      targetId: id,
+      targetType: FAVORITE_TARGET.SONG,
+    });
+    if (existing) {
+      await Favorite.deleteOne({ _id: existing._id });
+      song.isFavorite = false;
+    } else {
+      await Favorite.create({
+        userId,
+        targetId: id,
+        targetType: FAVORITE_TARGET.SONG,
+      });
+      song.isFavorite = true;
+    }
+  } else {
+    song.isFavorite = !song.isFavorite;
+  }
+
   await song.save();
   return song;
 };

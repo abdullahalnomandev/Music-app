@@ -19,6 +19,11 @@ const songSchema = new Schema<ISong, SongModel>(
     releaseDate: {
       type: Date,
     },
+    type:{
+      type: String,
+      default: 'AUDIO',
+      enum: ['AUDIO', 'VIDEO'],
+    },
     duration: {
       type: String,
     },

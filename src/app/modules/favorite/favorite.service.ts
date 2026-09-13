@@ -5,12 +5,19 @@ import { Favorite } from './favorite.model';
 import { FAVORITE_TARGET } from './favorite.constant';
 import { Types } from 'mongoose';
 import { Song } from '../song/song.model';
+import { Video } from '../video/video.model';
 
 const toggleFavoriteInDB = async (payload: IFavorite) => {
   const { userId, targetId, targetType } = payload;
 
   const existing = await Favorite.findOne({ userId, targetId, targetType });
-  const isMediaExist = await Song.exists({ _id: targetId });
+
+  let isMediaExist = false;
+  if (targetType === FAVORITE_TARGET.VIDEO) {
+    isMediaExist = !!(await Video.exists({ _id: targetId }));
+  } else {
+    isMediaExist = !!(await Song.exists({ _id: targetId }));
+  }
 
   if (!isMediaExist) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Media not found');
@@ -62,12 +69,38 @@ const getMyFavoritesFromDB = async (
   });
 
   pipeline.push({
+    $lookup: {
+      from: 'videos',
+      let: { targetId: '$targetId', targetType: '$targetType' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ['$_id', '$$targetId'] },
+                { $eq: ['$$targetType', FAVORITE_TARGET.VIDEO] },
+              ],
+            },
+          },
+        },
+      ],
+      as: '_video',
+    },
+  });
+
+  pipeline.push({
     $addFields: {
       item: {
         $cond: [
           { $gt: [{ $size: '$_song' }, 0] },
           { $first: '$_song' },
-          null,
+          {
+            $cond: [
+              { $gt: [{ $size: '$_video' }, 0] },
+              { $first: '$_video' },
+              null,
+            ],
+          },
         ],
       },
     },
@@ -75,7 +108,16 @@ const getMyFavoritesFromDB = async (
 
   pipeline.push(
     { $match: { item: { $ne: null } } },
-    { $replaceRoot: { newRoot: '$item' } },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            '$item',
+            { targetType: '$targetType', favoriteId: '$_id' },
+          ],
+        },
+      },
+    },
     { $sort: { createdAt: -1 } },
     { $skip: skip },
     { $limit: limit }
@@ -91,7 +133,22 @@ const getMyFavoritesFromDB = async (
         as: '_song',
       },
     },
-    { $match: { targetType: FAVORITE_TARGET.SONG, _song: { $ne: [] } } },
+    {
+      $lookup: {
+        from: 'videos',
+        localField: 'targetId',
+        foreignField: '_id',
+        as: '_video',
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { targetType: FAVORITE_TARGET.SONG, _song: { $ne: [] } },
+          { targetType: FAVORITE_TARGET.VIDEO, _video: { $ne: [] } },
+        ],
+      },
+    },
     { $count: 'total' },
   ];
 

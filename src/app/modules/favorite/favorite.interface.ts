@@ -5,7 +5,7 @@ export interface IFavorite {
   _id?: Types.ObjectId;
   userId: Types.ObjectId;
   targetId: Types.ObjectId | string;
-  targetType: FAVORITE_TARGET;
+  targetType?: FAVORITE_TARGET;
   createdAt?: Date;
   updatedAt?: Date;
 }

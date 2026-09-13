@@ -6,6 +6,7 @@ export interface ISong {
   artist: string;
   cover_image: string;
   releaseDate: Date;
+  type: 'AUDIO' | 'VIDEO';
   duration: string;
   audio: string;
   rating: number;

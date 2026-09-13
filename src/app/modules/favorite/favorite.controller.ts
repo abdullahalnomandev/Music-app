@@ -4,15 +4,31 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { FavoriteService } from './favorite.service';
 import { FAVORITE_TARGET } from './favorite.constant';
+import { Song } from '../song/song.model';
+import { Video } from '../video/video.model';
 
 const toggleFavorite = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const { targetId } = req.params;
 
+  const song = await Song.findOne({ _id: targetId });
+  const video = await Video.findOne({ _id: targetId });
+  
+  if (!song && !video) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Target media not found',
+      data: null
+    });
+  }
+
+  const targetType = song ? FAVORITE_TARGET.SONG : FAVORITE_TARGET.VIDEO;
+
   const result = await FavoriteService.toggleFavoriteInDB({
     userId,
     targetId,
-    targetType: FAVORITE_TARGET.SONG,
+    targetType
   });
 
   sendResponse(res, {
@@ -44,12 +60,17 @@ const getMyFavorites = catchAsync(async (req: Request, res: Response) => {
 
 const checkFavorite = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  const { targetId, targetType } = req.params;
+  const { targetId } = req.params;
+  const targetType = (
+    req.params.targetType ||
+    req.query?.targetType ||
+    FAVORITE_TARGET.SONG
+  ) as FAVORITE_TARGET;
 
   const result = await FavoriteService.checkFavoriteInDB(
     userId,
     targetId,
-    targetType as FAVORITE_TARGET
+    targetType
   );
 
   sendResponse(res, {

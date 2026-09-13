@@ -32,7 +32,8 @@ const getSongById = catchAsync(async (req: Request, res: Response) => {
 
 const toggleFavorite = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await SongService.toggleFavoriteInDB(id);
+  const userId = req.user?.id;
+  const result = await SongService.toggleFavoriteInDB(id, userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
