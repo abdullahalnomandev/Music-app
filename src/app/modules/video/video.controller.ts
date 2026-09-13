@@ -85,10 +85,38 @@ const createVideo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const toggleFeatured = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await VideoService.toggleFeaturedInDB(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: result.isFeatured
+      ? 'Video marked as featured'
+      : 'Video removed from featured',
+    data: result,
+  });
+});
+
+const getFeaturedVideos = catchAsync(async (req: Request, res: Response) => {
+  const result = await VideoService.getFeaturedVideosFromDB(req.query as Record<string, any>);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Featured videos retrieved successfully',
+    pagination: result.pagination,
+    data: result.data,
+  });
+});
+
 export const VideoController = {
   getAllVideos,
   getVideoById,
   toggleFavorite,
   recordPlay,
   createVideo,
+  toggleFeatured,
+  getFeaturedVideos,
 };

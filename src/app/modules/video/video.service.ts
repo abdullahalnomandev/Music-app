@@ -161,10 +161,27 @@ const createVideoInDB = async (payload: Partial<IVideo>): Promise<IVideo> => {
   return await Video.create(payload);
 };
 
+const toggleFeaturedInDB = async (id: string): Promise<IVideo> => {
+  const video = await Video.findById(id);
+  if (!video) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Video not found');
+  }
+
+  video.isFeatured = !video.isFeatured;
+  await video.save();
+  return video;
+};
+
+const getFeaturedVideosFromDB = async (query: Record<string, any>) => {
+  return await getAllVideosFromDB({ ...query, isFeatured: true });
+};
+
 export const VideoService = {
   getAllVideosFromDB,
   getVideoByIdFromDB,
   toggleFavoriteInDB,
   recordPlayInDB,
   createVideoInDB,
+  toggleFeaturedInDB,
+  getFeaturedVideosFromDB,
 };

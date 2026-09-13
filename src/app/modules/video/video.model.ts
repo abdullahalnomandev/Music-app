@@ -38,6 +38,10 @@ const videoSchema = new Schema<IVideo, VideoModel>(
     video: {
       type: String,
     },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

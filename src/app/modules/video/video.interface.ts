@@ -12,6 +12,7 @@ export interface IVideo {
   viewsCount: number;
   type: 'AUDIO' | 'VIDEO';
   isFavorite: boolean;
+  isFeatured?: boolean;
   playCount: number;
   averageRating?: number;
   avgRating?: number;
