@@ -1,0 +1,42 @@
+import { Schema, model } from 'mongoose';
+import { ISong, SongModel } from './song.interface';
+
+const songSchema = new Schema<ISong, SongModel>(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    artist: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    cover_image: {
+      type: String,
+    },
+    releaseDate: {
+      type: Date,
+    },
+    duration: {
+      type: String,
+    },
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
+    playCount: {
+      type: Number,
+      default: 0,
+    },
+    audio: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export const Song = model<ISong, SongModel>('Song', songSchema);
