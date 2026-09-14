@@ -6,6 +6,8 @@ import { VideoRoutes } from '../app/modules/video/video.route';
 import { PlaylistRoutes } from '../app/modules/playlist/playlist.route';
 import { RatingRoutes } from '../app/modules/rating/rating.route';
 import { FavoriteRoutes } from '../app/modules/favorite/favorite.route';
+import { SupportRoutes } from '../app/modules/support/support.route';
+import { SettingsRoutes } from '../app/modules/settings/settings.route';
 
 const router = express.Router();
 
@@ -38,6 +40,14 @@ const apiRoutes = [
     path: '/favorites',
     route: FavoriteRoutes,
   },
+  {
+    path: '/supports',
+    route: SupportRoutes,
+  },
+  {
+    path: "/settings",
+    route: SettingsRoutes
+  }
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
