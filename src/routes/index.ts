@@ -8,6 +8,7 @@ import { RatingRoutes } from '../app/modules/rating/rating.route';
 import { FavoriteRoutes } from '../app/modules/favorite/favorite.route';
 import { SupportRoutes } from '../app/modules/support/support.route';
 import { SettingsRoutes } from '../app/modules/settings/settings.route';
+import { PackageRoutes } from '../app/modules/package/package.route';
 
 const router = express.Router();
 
@@ -47,7 +48,11 @@ const apiRoutes = [
   {
     path: "/settings",
     route: SettingsRoutes
-  }
+  },
+  {
+    path: '/packages',
+    route: PackageRoutes,
+  },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
