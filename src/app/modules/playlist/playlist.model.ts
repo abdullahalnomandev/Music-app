@@ -3,18 +3,33 @@ import { IPlaylist, PlaylistModel } from './playlist.interface';
 
 const playlistSchema = new Schema<IPlaylist, PlaylistModel>(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     name: {
       type: String,
       required: true,
       trim: true,
     },
-    songIds: [
+    description: {
+      type: String,
+      trim: true,
+    },
+    coverImage: {
+      type: String,
+    },
+    songs: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Song',
         default: [],
       },
     ],
+    isPublic: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
@@ -23,9 +38,9 @@ const playlistSchema = new Schema<IPlaylist, PlaylistModel>(
   }
 );
 
-// Virtual field to derive songCount dynamically from songIds.length
+// Virtual field to derive songCount dynamically from songs.length
 playlistSchema.virtual('songCount').get(function () {
-  return Array.isArray(this.songIds) ? this.songIds.length : 0;
+  return Array.isArray(this.songs) ? this.songs.length : 0;
 });
 
 export const Playlist = model<IPlaylist, PlaylistModel>(

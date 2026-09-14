@@ -123,6 +123,7 @@ const createUserToDB = async (
 };
 
 const getUserProfileFromDB = async (user: JwtPayload): Promise<any> => {
+  console.log(user);
   const { id } = user;
 
   const isExistUser = await User.findById(id, '-status -authorization').lean();

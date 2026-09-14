@@ -3,8 +3,12 @@ import { ISong } from '../song/song.interface';
 
 export interface IPlaylist {
   _id?: Types.ObjectId;
+  userId: Types.ObjectId;
   name: string;
-  songIds: Types.ObjectId[] | ISong[];
+  description?: string;
+  coverImage?: string;
+  songs: Types.ObjectId[] | ISong[];
+  isPublic: boolean;
   songCount?: number;
   createdAt?: Date;
   updatedAt?: Date;
